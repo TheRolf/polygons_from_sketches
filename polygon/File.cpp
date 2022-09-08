@@ -20,6 +20,7 @@ vector<Segment> File::readLines(string filename) {
 		lines[i].setCoordinates(Point(x1, y1), Point(x2, y2));
 	}
 	infile.close();
+	
 	return lines;
 }
 

@@ -7,8 +7,7 @@ using std::vector;
 
 int Polygon::n_polygons = 0;
 
-Polygon::Polygon() {
-	n_sides = 0;
+Polygon::Polygon(): n_sides(0) {
 	coordinates = vector<Point>();
 	serial_no = n_polygons;
 	n_polygons++;
