@@ -20,19 +20,21 @@ vector<Segment> File::readLines(string filename) {
 		lines[i].setCoordinates(Point(x1, y1), Point(x2, y2));
 	}
 	infile.close();
+	
 	return lines;
 }
 
 void File::writePolygons(string filename, vector<Polygon> polygons) {
-	std::fstream outfile;
+	std::ofstream outfile;
 	outfile.open(filename);
 	outfile << polygons.size() << std::endl;
 	for (vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); polygon++) {
-		outfile << polygon->n_sides << std::endl;
+		outfile << std::endl << polygon->n_sides << std::endl;
 		for (int j = 0; j < polygon->n_sides; j++) {
 			Point point = polygon->coordinates[j];
 			outfile << point.x << " " << point.y << std::endl;
 		}
+		std::cout << "Written " << polygon->n_sides << "-sided polygon to file." << std::endl;
 	}
 	outfile.close();
 	return;

@@ -7,17 +7,13 @@ using std::map;
 
 int Point::n_point = 0;
 
-Point::Point() {
-	x = 0;
-	y = 0;
+Point::Point(): x(0), y(0) {
 	map<int, int> on_segment = map<int, int>();
 	serial_no = n_point;
 	n_point++;
 }
 
-Point::Point(float x0, float y0) {
-	x = x0;
-	y = y0;
+Point::Point(float x0, float y0): x(x0), y(y0) {
 	map<int, int> on_segment = map<int, int>();
 	serial_no = n_point;
 	n_point++;

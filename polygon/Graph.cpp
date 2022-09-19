@@ -13,9 +13,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-Graph::Graph() {
-	n_nodes = 0;
-	n_edges = 0;
+Graph::Graph(): n_nodes(0), n_edges(0) {
 	nodes = set<int>();
 	edges = set<pair<int, int>>();
 	adjacency = map<int, set<int>>();
@@ -39,7 +37,7 @@ void Graph::addEdge(int u, int v) {
 	}
 	if (!hasEdge(u, v)) {
 		edges.insert({ u, v });
-		edge_available.insert(std::make_pair(std::make_pair(u, v), true));
+		edge_available.insert({ {u, v}, true });
 		adjacency.find(u)->second.insert(v);
 		n_edges++;
 	}
@@ -61,7 +59,7 @@ void Graph::printEdges() {
 }
 
 bool Graph::edgeAvailable(int u, int v) {
-	return edge_available.find(std::make_pair(u, v))->second;
+	return edge_available.find({ u, v })->second;
 }
 
 bool Graph::edgesAvailable() {
@@ -81,7 +79,7 @@ bool Graph::nodeAvailable(int u) {
 }
 
 void Graph::disableEdge(int u, int v) {
-	edge_available.find(std::make_pair(u, v))->second = false;
+	edge_available.find({ u, v })->second = false;
 }
 
 bool Graph::hasLeaves() {
@@ -186,7 +184,6 @@ vector<vector<int>> Graph::findCycles(set<Point>* points) {
 			}
 		}
 		if (u == -1) break;
-		// cout << "u(" << u << ") ";
 		stack.push(u);
 		int prev = u;
 
@@ -198,7 +195,6 @@ vector<vector<int>> Graph::findCycles(set<Point>* points) {
 				break;
 			}
 		}
-		// cout << "v(" << v << ") ";
 		if (v == -1) {
 			node_available.insert({ u, false });
 			continue;
@@ -220,14 +216,12 @@ vector<vector<int>> Graph::findCycles(set<Point>* points) {
 				if (*iter_next != prev && edgeAvailable(v, *iter_next) && (nodeAvailable(*iter_next) || *iter_next == u)) {
 					Point c = getPoint(points, *iter_next);
 					float angle = c.angle(a, b);
-					// cout << "Angle of points " << prev << " " << v << " " << *iter_next << " : " << angle << endl;
 					if (angle < next_angle) {
 						next = *iter_next;
 						next_angle = angle;
 					}
 				}
 			}
-			// cout << next << " ";
 
 			if (next == -1 && stack.size() < 2) break;
 
@@ -244,8 +238,6 @@ vector<vector<int>> Graph::findCycles(set<Point>* points) {
 				v = next;
 			}
 		}
-
-		// cout << endl;
 		
 		if (!stack.empty()) {
 			int cycle_size = (int)stack.size();
@@ -257,16 +249,9 @@ vector<vector<int>> Graph::findCycles(set<Point>* points) {
 
 			if (cycle[0] == cycle[cycle.size() - 1] && cycle.size() > 3) {
 				cycles.push_back(cycle);
-				/*
-				for (int i = 0; i < cycle.size(); i++) {
-					cout << " " << cycle[i];
-				}
-				cout << endl;
-				*/
 			}
 		}
 
 	}
-	// printEdges();
 	return cycles;
 }

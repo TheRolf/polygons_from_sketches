@@ -5,6 +5,7 @@
 #include "Algorithms.h"
 #include "Graph.h"
 #include "Polygon.h"
+#include "Instance.h"
 
 using std::map;
 using std::pair;
@@ -13,27 +14,6 @@ using std::tuple;
 using std::vector;
 
 float Algorithms::EPS = (float) 0.0001;
-
-tuple<bool, float, float> Algorithms::segmentsIntersectParams(Segment* s1, Segment* s2) {
-	tuple<bool, float, float> null = std::make_tuple(false, 0, 0);
-	float denominator = (s1->p.x - s1->q.x)*(s2->p.y - s2->q.y) - (s1->p.y - s1->q.y)*(s2->p.x - s2->q.x);
-	// If denominator too close to zero.
-	if (denominator < EPS && denominator > -EPS) return null;
-
-	float u_numerator = (s1->p.x - s2->p.x)*(s1->p.y - s1->q.y) - (s1->p.y - s2->p.y)*(s1->p.x - s1->q.x);
-	// If u > 1
-	if (abs(u_numerator) > abs(denominator)) return null;
-	// If u < 0 (u_num and den different sign)
-	if((u_numerator > 0 && denominator < 0) || (u_numerator < 0 && denominator > 0)) return null;
-	
-	float t_numerator = (s1->p.x - s2->p.x)*(s2->p.y - s2->q.y) - (s1->p.y - s2->p.y)*(s2->p.x - s2->q.x);
-	// If t > 1
-	if (abs(t_numerator) > abs(denominator)) return null;
-	// If t < 0 (t_num and den different sign)
-	if ((t_numerator > 0 && denominator < 0) || (t_numerator < 0 && denominator > 0)) return null;
-
-	return std::make_tuple(true, t_numerator / denominator, u_numerator / denominator);
-}
 
 Polygon Algorithms::cycleToPolygon(set<Point>* points, vector<int> cycle) {
 	Polygon polygon = Polygon();
@@ -68,7 +48,7 @@ void Algorithms::removeLargestPolygon(vector<Polygon>* polygons, vector<vector<i
 	}
 }
 
-vector<Polygon> Algorithms::algorithm(vector<Segment>* segments) {
+vector<Polygon> Algorithms::algorithm(vector<Segment>* segments, Instance* instance) {
 	bool removeLargestPolygonQ = false;
 	bool sortPolygonsDecreasingQ = false;
 	
@@ -77,12 +57,14 @@ vector<Polygon> Algorithms::algorithm(vector<Segment>* segments) {
 	Graph G = Graph();
 
 	// Intersection points of segments
+	instance->calculateIntersectionPoints();
+
 	for (vector<Segment>::iterator s1 = segments->begin(); s1 != segments->end(); ++s1) {
 		for (vector<Segment>::iterator s2 = s1+1; s2 != segments->end(); ++s2) {
-			tuple<bool, float, float> t_and_u = segmentsIntersectParams(&*s1, &*s2);
-			if (std::get<0>(t_and_u)) {
-				float t = std::get<1>(t_and_u);
-				float u = std::get<2>(t_and_u);
+			Intersection intersection = s1->intersectParams(&*s2);
+			if (intersection.existsQ) {
+				float t = intersection.t;
+				float u = intersection.u;
 
 				Point p = s1->pointOnSegment(t);
 				s1->contains_point.insert({ t, p });
@@ -95,29 +77,28 @@ vector<Polygon> Algorithms::algorithm(vector<Segment>* segments) {
 	// Sort the intersection points on each segment, according to their positions
 	// Building the graph G of intersection points;
 	// edge between two points if they are next to each other on a segment in *both* directions
-	 
+	instance->buildGraphOfSegments();
+
 	for (vector<Segment>::iterator s1 = segments->begin(); s1 != segments->end(); ++s1) {
-		// cout << "segment " << s1->serial_no << " " << s1->contains_point.size() << ": ";
 		vector<pair<float, Point>> points;
 		points = s1->sortedListOfPoints();
 		if (points.size() > 0) {
 			int i;
 			for (i = 0; i < points.size() - 1; i++) {
-				// cout << points[i].first << " " << points[i].second.x << "," << points[i].second.y << "; ";
-				G.addEdge(points[i].second.serial_no, points[i + 1].second.serial_no);
-				G.addEdge(points[i + 1].second.serial_no, points[i].second.serial_no);
+				G.addEdge(points[i].second.serial_no, points[i+1].second.serial_no);
+				G.addEdge(points[i+1].second.serial_no, points[i].second.serial_no);
 			}
-			// cout << points[i].first << " " << points[i].second.x << "," << points[i].second.y << endl;
 		}
 	}
-
 	// Get rid of degree-1 and degree-0 nodes, they don't contribute in any cycles in G, or faces in the end
 	G.trimGraph();
 
 	// Finding the minimal faces
+	instance->findMinimalFaces();
 	cycles = G.findCycles(&intersection_points);
 
 	// Building the polygons of the faces from position data
+	instance->buildPolygons(true, true);
 	vector<Polygon> polygons = vector<Polygon>();
 	for (vector<vector<int>>::iterator cycle = cycles.begin(); cycle != cycles.end(); cycle++) {
 		Polygon polygon = cycleToPolygon(&intersection_points, *cycle);
@@ -143,5 +124,6 @@ vector<Polygon> Algorithms::algorithm(vector<Segment>* segments) {
 	if (sortPolygonsDecreasingQ) {
 		sort(polygons.begin(), polygons.end(), Polygon::cmpPolygon);
 	}
-	return polygons;
+
+	return polygons; // instance->polygons;
 }
