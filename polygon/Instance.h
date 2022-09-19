@@ -9,9 +9,13 @@ private:
 	vector<Segment> segments;
 	set<Point> intersection_points;
 	Graph G;
-	vector<Polygon> polygons;
+	vector<vector<int>> cycles;
+
 
 public:
 	void calculateIntersectionPoints();
 	void buildGraphOfSegments();
+	void findMinimalFaces();
+	void buildPolygons(bool, bool);
+	vector<Polygon> polygons;
 };

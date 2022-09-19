@@ -9,6 +9,12 @@ using std::pair;
 using std::tuple;
 using std::vector;
 
+struct Intersection {
+	bool existsQ = false;
+	float t;
+	float u;
+};
+
 class Segment
 {
 private:
@@ -24,7 +30,7 @@ public:
 	void setCoordinates(Point, Point);
 	Point pointOnSegment(float);
 	
-	tuple<bool, float, float> intersectParams(Segment*);
+	Intersection intersectParams(Segment*);
 	vector<pair<float, Point>> sortedListOfPoints();
 	friend bool operator< (const Segment&, const Segment&);
 	static bool cmp(pair<float, Point>& a, pair<float, Point>& b);

@@ -1,7 +1,5 @@
 #include "Algorithms.h"
 #include "Instance.h"
-#include "Segment.h"
-#include <algorithm>
 #include <tuple>
 
 void Instance::calculateIntersectionPoints() {
@@ -11,6 +9,7 @@ void Instance::calculateIntersectionPoints() {
 			if (intersection.existsQ) {
 				float t = intersection.t;
 				float u = intersection.u;
+
 
 				Point p = s1->pointOnSegment(t);
 				s1->contains_point.insert({ t, p });
@@ -67,3 +66,4 @@ void Instance::buildPolygons(bool removeLargestPolygonQ=true, bool sortPolygonsD
 		sort(polygons.begin(), polygons.end(), Polygon::cmpPolygon);
 	}
 }
+

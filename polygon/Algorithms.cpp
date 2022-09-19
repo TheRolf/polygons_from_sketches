@@ -52,6 +52,8 @@ vector<Polygon> Algorithms::algorithm(vector<Segment>* segments, Instance* insta
 	bool removeLargestPolygonQ = false;
 	bool sortPolygonsDecreasingQ = false;
 	
+
+
 	set<Point> intersection_points;
 	vector<vector<int>> cycles;
 	Graph G = Graph();
@@ -73,6 +75,7 @@ vector<Polygon> Algorithms::algorithm(vector<Segment>* segments, Instance* insta
 			}
 		}
 	}
+
 
 	// Sort the intersection points on each segment, according to their positions
 	// Building the graph G of intersection points;
